@@ -1,0 +1,57 @@
+node{
+  stage('Git Checkout'){
+       git url: 'https://github.com/smkorde/sample-spring-microservices'
+   }
+
+
+stage('Mvn Build Project'){
+     bat 'mvn clean install'
+   }
+   
+
+
+stage('Build Docker Image'){
+    dir ('discovery-service') {
+     bat 'docker build -t skorde/discovery-service . --no-cache'
+    }
+   }
+   
+   stage('Push Docker Image'){
+     bat 'docker login -u skorde -p nopassword'
+     bat 'docker push skorde/discovery-service'
+   }
+ 
+ /*
+   stage('Build Docker Image'){
+       dir ('discovery-service') {
+                bat "docker login -u skorde -p nopassword"
+                def app = docker.build --no-cache "skorde/discovery-service"
+                app.push()
+            }
+     
+   }*/
+ stage('Stop and Remove Previous Container'){
+	try{
+   powershell 'docker container stop $(docker container ls -aq)'
+   powershell 'docker container rm $(docker container ls -aq)'
+	}catch(error){
+		//  do nothing if there is an exception
+	}
+ }
+   stage('Run Container on Dev Server'){
+       docker.image("skorde/discovery-service").run('-p 8761:8761 -h discovery --name discovery')
+       
+   }
+   
+   stage('Archive Artifact'){
+    archiveArtifacts '**/*'
+}
+
+  stage ('Final') {
+            build job:'account-service-pipeline', wait: false
+        }  
+}
+		//def dockerRm = 'docker rm -f myweb'
+		//sshagent(['docker-dev']) {
+		//	sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.196 ${dockerRm}"
+		//}
