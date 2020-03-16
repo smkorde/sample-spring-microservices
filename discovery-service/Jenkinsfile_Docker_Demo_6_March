@@ -24,7 +24,7 @@ stage('Build Docker Image'){
  /*
    stage('Build Docker Image'){
        dir ('discovery-service') {
-                bat "docker login -u skorde -p nopassword"
+                bat "docker login -u ### -p ###"
                 def app = docker.build --no-cache "skorde/discovery-service"
                 app.push()
             }
