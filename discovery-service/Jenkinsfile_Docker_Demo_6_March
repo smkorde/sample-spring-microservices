@@ -17,7 +17,7 @@ stage('Build Docker Image'){
    }
    
    stage('Push Docker Image'){
-     bat 'docker login -u skorde -p nopassword'
+     bat 'docker login -u ## -p ###'
      bat 'docker push skorde/discovery-service'
    }
  
