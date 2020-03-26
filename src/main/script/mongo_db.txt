@@ -1,0 +1,21 @@
+use test
+
+db.account.insert({"_id" : "1","customerId" : "1","number" : "100"})
+db.account.insert({"_id" : "2","customerId" : "2","number" : "101"})
+db.account.insert({"_id" : "3","customerId" : "3","number" : "102"})
+db.account.insert({"_id" : "4","customerId" : "3","number" : "103"})
+db.account.insert({"_id" : "5","customerId" : "3","number" : "104"})
+
+db.customer.insert({"_id" : "1","pesel" : "1234","name" : "Tom","type" : "INDIVIDUAL","accounts" : [ {  }, {  }, {  } ]})
+db.customer.insert({"_id" : "2","pesel" : "1235","name" : "Dick","type" : "INDIVIDUAL","accounts" : [ {  }, {  }, {  } ]})
+db.customer.insert({"_id" : "3","pesel" : "1236","name" : "Harry","type" : "COMPANY","accounts" : [ {  }, {  }, {  } ]})
+ 
+String id, String customerId, String number
+
+db.createUser({user: 'micro',pwd: 'micro',roles: [ { role: 'userAdmin', db: 'test' } ]});
+
+db.grantRolesToUser( "micro", [ userAdmin ], { role: 'userAdmin', db: 'test' }  )
+
+db.grantRolesToUser("micro",[ "readWrite" , { role: "userAdmin", db: "test" } ],{ w: "majority" , wtimeout: 4000 })
+
+docker exec -it a4f3c73b835d bash
