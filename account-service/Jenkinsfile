@@ -1,37 +1,46 @@
- using hostname.
-
-[code language="java"]
-node {
-
-    withMaven(maven:'maven') {
-
-        stage('Checkout') {
-            git url: 'https://github.com/piomin/sample-spring-microservices.git', credentialsId: 'github-piomin', branch: 'master'
-        }
-
-        stage('Build') {
-            sh 'mvn clean install'
-
-            def pom = readMavenPom file:'pom.xml'
-            print pom.version
-            env.version = pom.version
-        }
-
-        stage('Image') {
-            dir ('account-service') {
-                def app = docker.build "localhost:5000/account-service:${env.version}"
-                app.push()
-            }
-        }
-
-        stage ('Run') {
-            docker.image("localhost:5000/account-service:${env.version}").run('-p 2222:2222 -h account --name account --link discovery')
-        }
-
-        stage ('Final') {
-            build job: 'customer-service-pipeline', wait: false
-        }      
-
+node{
+    stage('code checkout'){
+     git branch: 'kubernetes', url: 'https://github.com/smkorde/sample-spring-microservices'
+    }
+    stage('Build'){
+     bat 'mvn clean install'
     }
 
+    stage('Unit test'){
+	//bat 'mvn test'
+	}
+
+    stage('Code Coverage'){
+     //bat 'mvn jacoco:report'
+    }
+    
+    stage('Code Quality'){
+     //bat 'mvn sonar:sonar'
+     //bat 'mvn sonar-breaker:analyze'
+    }
+    stage('Build Docker Image'){
+        //dir ('account-service') {
+        //bat 'docker build -t skorde/account-service . --no-cache'
+      //  }
+    }
+   
+    stage('Push Docker Image'){
+        //bat 'docker login -u skorde -p nopassword'
+        //bat 'docker push skorde/account-service'
+    }
+ 
+    stage('Deploy Application'){
+        dir ('account-service') {
+        bat 'kubectl apply -f deployment-account.yml'
+        bat 'kubectl apply -f service-account.yml'
+        }    
+     }
+   
+    stage('Archive Artifact'){
+        archiveArtifacts '**/*'
+    }
+
+  stage ('Final') {
+//            build job:'customer-service', wait: false
+        }  
 }
